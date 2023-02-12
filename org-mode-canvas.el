@@ -82,60 +82,35 @@
      		    ;;   (org-element-property :title headline)))
                     (title (org-element-property :raw-value hl))
                     ;; each hl by def has a single section up to the next HL
-                    (section (org-element-map hl 'section #'identity nil t))
-                    )
-
-
+                    (section (org-element-map hl 'section #'identity nil t)))
   `((title . ,title)
     (coords . ,(mapcar #'string-to-number (split-string coords)))
-    (paras .
-
-          
+    (body .
+          (
           ;; for each section we want something like:
-          ;; {"title": "bleh", "coords": [200, 100], "paras": [<html>, <html>, <html>]}
+          ;; {"title": "bleh", "coords": [200, 100], "body": [<html>, <link>]}
           ;; within section, get out paragraphs
           ,(org-element-map section 'paragraph
             (lambda (para)
               ;; each paragraph can have multiple children: link, bold,
               ;; straight text (looks like special object type is 'plain-text)
-              ;; -- search org-element.el
-              ;; ANYWAYS
-              
-              ;; we want to iterate through paragraphs and just render, with
-              ;; ONLY special treatment of [[id:bleh][...]] link type
-
-              ;; actually, we want to render the whole paragraph, with any link objects removed
-
-              ;; this is how you would go through paragraph's children, but you get extra <p> everywhere...
-              ;; (org-element-map para (cons 'plain-text org-element-all-objects)
-              ;;   (lambda (ent)
-              ;;     ;; org-element-type will give you plain-text, link, etc
-              ;;     (omc--to-html (org-element-interpret-data ent))))
-
-              ;; let's first render the whole para as one
+              ;; -- search org-element.el for more
+              ;; we convert each paragraph to HTML
               (omc--to-html (org-element-interpret-data para))
-
-              ;; then get out the first link of type ID for transclusion
-              (org-element-map para 'link
-                (lambda (l)
-                  l) nil t)
-
-
-              
               )
+            ) ;; first pass of section to get paragraphs
 
-
-            )
-
-
-          ))
-          
+          ;; second pass of section
+          ;; to get out the first link of type ID for transclusion
+          ,(org-element-map section 'link
+             (lambda (lnk)
+                   (and (string= (org-element-property :type lnk) "id")
+                        (org-element-property :path lnk)))
+             nil t)
+          ) ;; end of body list
+          )) ;; end of object
           ) ;; end of when-let
-
-        )
-      )
-  ))
-
+        ))))
 
 
 ;; can't use defservlet here because we need current-buffer
