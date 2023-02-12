@@ -1,0 +1,10 @@
+I would like to have something like Obsidian Canvas for Org mode.
+
+See [[https://www.reddit.com/r/ObsidianMD/comments/10ws9z4/canvas_has_completely_changed_obsidian_for_me_now/][this thread on Reddit]] for an example of Obsidian Canvas.
+
+At the moment, this is what I have in mind:
+
+- IN-PROGRESS: Use the org-element API to parse a =*.canvas.org= file.
+- Serve the parsed representation via =simple-httpd=.
+- Frontend part renders notes with edges. I have built various HTML proofs of concept.
+  
