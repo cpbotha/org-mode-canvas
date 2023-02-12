@@ -1,4 +1,5 @@
-;; bleh
+;; an attempt at making an HTML canvas where org-mode notes can be laid out, like Obsidian Canvas
+;; copyright by Charl P. Botha <http://charlotha.com/> under the BSD 3-clause
 
 ;; notes
 ;; - ielm-change-working-buffer
