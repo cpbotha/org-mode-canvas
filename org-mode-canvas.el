@@ -85,11 +85,16 @@
                     (section (org-element-map hl 'section #'identity nil t))
                     )
 
+
+  `((title . ,title)
+    (coords . ,(mapcar #'string-to-number (split-string coords)))
+    (paras .
+
+          
           ;; for each section we want something like:
           ;; {"title": "bleh", "coords": [200, 100], "paras": [<html>, <html>, <html>]}
           ;; within section, get out paragraphs
-          (message "%s" section)
-          (org-element-map section 'paragraph
+          ,(org-element-map section 'paragraph
             (lambda (para)
               ;; each paragraph can have multiple children: link, bold,
               ;; straight text (looks like special object type is 'plain-text)
@@ -111,6 +116,9 @@
               (omc--to-html (org-element-interpret-data para))
 
               ;; then get out the first link of type ID for transclusion
+              (org-element-map para 'link
+                (lambda (l)
+                  l) nil t)
 
 
               
@@ -118,9 +126,11 @@
 
 
             )
+
+
+          ))
           
-          ;; headline -> section -> paragraph -> link
-          )
+          ) ;; end of when-let
 
         )
       )
