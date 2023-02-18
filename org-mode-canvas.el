@@ -14,56 +14,12 @@
 
 (require 'simple-httpd)
 
-(defun get-headline-with-text ()
-  (save-excursion
-    (save-restriction
-      (widen)
-      (ignore-errors (outline-up-heading 1))
-      (let* ((elt (org-element-at-point-no-context))
-             (title (org-element-property :title elt))
-             (beg (progn (org-end-of-meta-data t) (point)))
-             (end (progn (outline-next-visible-heading 1) (point))))
-        (list title (buffer-substring-no-properties beg end))))))
-
 (defun omc--to-html (s)
   "Convert string S from orgmode to HTML."
   (org-export-string-as s 'html 't))
 
-;; this json string
-(json-read-from-string "{\"title\": \"hello there\", \"coords\": [200,100]   }")
-;; gives this object:
-;; ((title . "hello there") (coords . [200 100]))
-
-;; https://stackoverflow.com/a/70366787/532513
-(defun omc-parse-headline ()
-
-  (when-let* ((coords (org-entry-get-multivalued-property nil "canvas_coords"))
-              (title (org-entry-get nil "ITEM"))
-              (elt (org-element-at-point-no-context))
-              )
-;; elt has section 
-    
-  `((title . ,title)
-    (coords . ,(mapcar #'string-to-number coords))
-
-
-    )
-
-    )
-  ;; ITEM is a Special Property whose value is the text of the headline.
-  )
-
-
-;; for now, let's just do current buffer with this
-(defun omc-parse-buffer-old ()
-  (let ((a (org-map-entries #'omc-parse-headline t nil)))
-    (message "%s" a)
-      (json-encode a)
-        )
-  )
-
 ;; thanks GPT-enabled bing!
-(defun extract-body (html)
+(defun omc--extract-body (html)
   "Extract the part between <body> and </body> tags from HTML."
   (let ((start (search "<body>" html))
         (end (search "</body>" html)))
@@ -72,7 +28,7 @@
 ;; given an id, return that node (could be a heading = title, or a file with #+TITLE) as HTML
 ;; example of headline inside of other file (2020-11-Nov)
 ;; (org-id-open "7b2de849-2a77-4e5e-bff2-6857fc9091f1" nil)
-(defun omc-org-id-to-html (id)
+(defun omc--org-id-to-html (id)
   (let ((fnpos (org-id-find id)))
     (unless fnpos
       (error "Cannot find entry with ID \"%s\"" id))
@@ -84,7 +40,7 @@
       ;; NOTE: body only unfortunately excludes rendering title in either mode, durnit!
       ;;       (note that without body only <body> does contain rendering of the title)
       ;;       so we just do the whole thing, then take everything between the two tags
-      (extract-body (org-export-as 'html (org-at-heading-p) nil nil)))))
+      (omc--extract-body (org-export-as 'html (org-at-heading-p) nil nil)))))
 
 ;; example paragraph element with only text, following (TYPE PROPERTIES CONTENTS):
 ;; (paragraph
@@ -181,4 +137,23 @@ This serves the web-build and API over HTTP."
 
 
 ;; default servlet httpd/ will serve files from httpd-root -- we would like to keep that
+
+
+;; SCRATCH AREA below this line ---------------------------------------
+
+(defun get-headline-with-text ()
+  (save-excursion
+    (save-restriction
+      (widen)
+      (ignore-errors (outline-up-heading 1))
+      (let* ((elt (org-element-at-point-no-context))
+             (title (org-element-property :title elt))
+             (beg (progn (org-end-of-meta-data t) (point)))
+             (end (progn (outline-next-visible-heading 1) (point))))
+        (list title (buffer-substring-no-properties beg end))))))
+
+;; this json string
+(json-read-from-string "{\"title\": \"hello there\", \"coords\": [200,100]   }")
+;; gives this object:
+;; ((title . "hello there") (coords . [200 100]))
 
