@@ -87,18 +87,14 @@
     (coords . ,(mapcar #'string-to-number (split-string coords)))
     (body .
           (
-          ;; for each section we want something like:
-          ;; {"title": "bleh", "coords": [200, 100], "body": [<html>, <link>]}
-          ;; within section, get out paragraphs
-          ,(org-element-map section 'paragraph
-            (lambda (para)
-              ;; each paragraph can have multiple children: link, bold,
-              ;; straight text (looks like special object type is 'plain-text)
-              ;; -- search org-element.el for more
-              ;; we convert each paragraph to HTML
-              (omc--to-html (org-element-interpret-data para))
-              )
-            ) ;; first pass of section to get paragraphs
+           ;; for each section we want something like:
+           ;; {"title": "bleh", "coords": [200, 100], "body": [<html>, <link>]}
+           ;; within section, get out paragraphs
+           ;; each paragraph can have multiple children: link, bold,
+           ;; straight text (looks like special object type is 'plain-text)
+           ;; -- search org-element.el for more
+           ;; first pass of section to get paragraphs -- we convert the whole list to one chunk of HTML
+          ,(omc--to-html (org-element-interpret-data (org-element-map section 'paragraph #'identity)))
 
           ;; second pass of section
           ;; to get out the first link of type ID for transclusion
