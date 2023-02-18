@@ -62,6 +62,30 @@
         )
   )
 
+;; thanks GPT-enabled bing!
+(defun extract-body (html)
+  "Extract the part between <body> and </body> tags from HTML."
+  (let ((start (search "<body>" html))
+        (end (search "</body>" html)))
+    (substring html (+ start 6) end)))
+
+;; given an id, return that node (could be a heading = title, or a file with #+TITLE) as HTML
+;; example of headline inside of other file (2020-11-Nov)
+;; (org-id-open "7b2de849-2a77-4e5e-bff2-6857fc9091f1" nil)
+(defun omc-org-id-to-html (id)
+  (let ((fnpos (org-id-find id)))
+    (unless fnpos
+      (error "Cannot find entry with ID \"%s\"" id))
+
+    (with-temp-buffer
+      (insert-file-contents (car fnpos))
+      (goto-char (cdr fnpos))
+      ;; if heading then export subtree only, else export buffer
+      ;; NOTE: body only unfortunately excludes rendering title in either mode, durnit!
+      ;;       (note that without body only <body> does contain rendering of the title)
+      ;;       so we just do the whole thing, then take everything between the two tags
+      (extract-body (org-export-as 'html (org-at-heading-p) nil nil)))))
+
 ;; example paragraph element with only text, following (TYPE PROPERTIES CONTENTS):
 ;; (paragraph
 ;;   (:begin 297 :end 325 :contents-begin 297 :contents-end 325 :post-blank 0 :post-affiliated 297 :mode nil :granularity nil :parent #48)
