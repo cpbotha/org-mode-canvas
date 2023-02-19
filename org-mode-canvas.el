@@ -16,7 +16,8 @@
 
 (defun omc--to-html (s)
   "Convert string S from orgmode to HTML."
-  (org-export-string-as s 'html 't))
+  (org-export-string-as s 'html 't)
+  )
 
 ;; thanks GPT-enabled bing!
 (defun omc--extract-body (html)
@@ -27,16 +28,17 @@
 
 ;; given an id, return that node (could be a heading = title, or a file with #+TITLE) as HTML
 ;; example of headline inside of other file (2020-11-Nov)
-;; (org-id-open "7b2de849-2a77-4e5e-bff2-6857fc9091f1" nil)
+;; (omc--org-id-to-html "7b2de849-2a77-4e5e-bff2-6857fc9091f1")
+;; TODO: extract title
 (defun omc--org-id-to-html (id)
+  "Find an org file or heading with ID and return its HTML representation."
   (let ((fnpos (org-id-find id)))
     (unless fnpos
       (error "Cannot find entry with ID \"%s\"" id))
-
     (with-temp-buffer
       (insert-file-contents (car fnpos))
       (goto-char (cdr fnpos))
-      ;; if heading then export subtree only, else export buffer
+      ;; if heading then export subtree only (SUBTREEP), else export buffer
       ;; NOTE: body only unfortunately excludes rendering title in either mode, durnit!
       ;;       (note that without body only <body> does contain rendering of the title)
       ;;       so we just do the whole thing, then take everything between the two tags
@@ -74,7 +76,9 @@
            ;; straight text (looks like special object type is 'plain-text)
            ;; -- search org-element.el for more
            ;; first pass of section to get paragraphs -- we convert the whole list to one chunk of HTML
-          ,(omc--to-html (org-element-interpret-data (org-element-map section 'paragraph #'identity)))
+           ;; you can't just interpret the list of paragraphs: only top-level org-data or element
+           ;;,(omc--to-html (org-element-interpret-data (org-element-map section 'paragraph #'identity)))
+           ,(omc--to-html (org-element-interpret-data section))
 
           ;; second pass of section
           ;; to get out the first link of type ID for transclusion
